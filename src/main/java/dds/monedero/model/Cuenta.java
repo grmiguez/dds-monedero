@@ -31,11 +31,11 @@ public class Cuenta {
       throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
     }
 
-    if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
+    if (getMovimientos().stream().filter(movimiento -> movimiento.tipoMovimiento().isDeposito()).count() >= 3) {
       throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
     }
 
-    agregarMovimiento(LocalDate.now(), cuanto, true);
+    agregarMovimiento(LocalDate.now(), cuanto, new Deposito());
   }
 
   public void sacar(double cuanto) {
@@ -52,26 +52,22 @@ public class Cuenta {
           + " diarios, límite: " + limite);
     }
 
-    agregarMovimiento(LocalDate.now(), cuanto, false);
+    agregarMovimiento(LocalDate.now(), cuanto, new Extraccion());
   }
 
-  public void agregarMovimiento(LocalDate fecha, double cuanto, boolean esDeposito) {
-    Movimiento movimiento = new Movimiento(fecha, cuanto, esDeposito);
+  public void agregarMovimiento(LocalDate fecha, double cuanto, TipoMovimiento tipo) {
+    Movimiento movimiento = new Movimiento(fecha, cuanto, tipo);
     movimientos.add(movimiento);
-    this.actualizarSaldo(movimiento.getMonto(), movimiento.isDeposito());
+    this.actualizarSaldo(movimiento.getMonto(), movimiento.tipoMovimiento());
   }
 
-  private void actualizarSaldo(Double monto, boolean esDeposito) {
-    Double saldoActualizado = esDeposito
-        ? this.getSaldo() + monto
-        : this.getSaldo() - monto;
-
-    this.setSaldo(saldoActualizado);
+  private void actualizarSaldo(Double monto, TipoMovimiento tipo) {
+    this.setSaldo(tipo.actualizarSaldo(getSaldo(), monto));
   }
 
   public double getMontoExtraidoA(LocalDate fecha) {
     return getMovimientos().stream()
-        .filter(movimiento -> !movimiento.isDeposito() && movimiento.getFecha().equals(fecha))
+        .filter(movimiento -> movimiento.tipoMovimiento().isExtraccion() && movimiento.getFecha().equals(fecha))
         .mapToDouble(Movimiento::getMonto)
         .sum();
   }

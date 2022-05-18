@@ -10,12 +10,12 @@ public class Movimiento {
   // BigDecimal en Java y similares
   // De todas formas, NO es necesario modificar ésto como parte de este ejercicio.
   private double monto;
-  private boolean esDeposito;
+  private TipoMovimiento tipo;
 
-  public Movimiento(LocalDate fecha, double monto, boolean esDeposito) {
+  public Movimiento(LocalDate fecha, double monto, TipoMovimiento tipo) {
     this.fecha = fecha;
     this.monto = monto;
-    this.esDeposito = esDeposito;
+    this.tipo = tipo;
   }
 
   public double getMonto() {
@@ -27,23 +27,19 @@ public class Movimiento {
   }
 
   public boolean fueDepositado(LocalDate fecha) {
-    return isDeposito() && esDeLaFecha(fecha);
+    return tipo.isDeposito() && esDeLaFecha(fecha);
   }
 
   public boolean fueExtraido(LocalDate fecha) {
-    return isExtraccion() && esDeLaFecha(fecha);
+    return tipo.isExtraccion() && esDeLaFecha(fecha);
   }
 
   public boolean esDeLaFecha(LocalDate fecha) {
     return this.fecha.equals(fecha);
   }
 
-  public boolean isDeposito() {
-    return esDeposito;
-  }
-
-  public boolean isExtraccion() {
-    return !esDeposito;
+  public TipoMovimiento tipoMovimiento() {
+    return tipo;
   }
 
 }
